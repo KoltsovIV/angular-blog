@@ -13,6 +13,8 @@ import {Subscription} from "rxjs";
 export class LoginPageComponent implements OnInit, OnDestroy {
 
   form!: FormGroup;
+  submitted = false;
+
   subscription!: Subscription;
 
   constructor(private auth: AuthService,
@@ -38,6 +40,8 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       return
     }
 
+    this.submitted = true;
+
     const user: User = {
       email: this.form.value.email,
       password: this.form.value.password
@@ -46,6 +50,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.subscription = this.auth.login(user).subscribe( () => {
       this.form.reset();
       this.router.navigate(['/admin', 'dashboard']);
+      this.submitted = false;
     })
   }
 
