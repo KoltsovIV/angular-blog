@@ -17,9 +17,8 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   subscription!: Subscription;
 
-  constructor(private auth: AuthService,
-              private router: Router
-  ) {
+  constructor(public auth: AuthService,
+              private router: Router) {
   }
 
   ngOnInit(): void {
@@ -51,7 +50,9 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       this.form.reset();
       this.router.navigate(['/admin', 'dashboard']);
       this.submitted = false;
-    })
+    }, () => {
+      this.submitted = false;
+      })
   }
 
   ngOnDestroy() {

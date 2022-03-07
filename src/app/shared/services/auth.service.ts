@@ -1,12 +1,15 @@
 import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse} from "@angular/common/http";
 import { User, FBAuthResponse } from "../components/interfaces";
-import {Observable, tap} from "rxjs";
+import {catchError, Observable, Subject, tap, throwError} from "rxjs";
 import {environment} from "../../../environments/environment";
 
 @Injectable()
 
 export class AuthService {
+
+  public error$: Subject<string> = new Subject<string>();
+  static error$: any;
 
   constructor(private http: HttpClient) {
   }
@@ -28,7 +31,8 @@ export class AuthService {
       .pipe(
         tap( resp => {
           AuthService.setToken(resp);
-        })
+        }),
+        catchError(AuthService.handleError.bind(this))
       )
   }
 
@@ -38,6 +42,27 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.token
+  }
+
+  private static handleError(error: HttpErrorResponse) {
+    const {message} = error.error.error;
+
+    console.log(message)
+
+    switch (message) {
+      case 'INVALID_EMAIL':
+        // @ts-ignore
+        this.error$.next('Invalid Email');
+        break;
+      case 'INVALID_PASSWORD':
+        this.error$.next('Invalid Password');
+        break
+      case 'EMAIL_NOT_FOUND':
+        this.error$.next('Email Not Found');
+        break
+    }
+
+    return throwError(error);
   }
 
   private static setToken(response: FBAuthResponse | null) {
